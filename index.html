@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TIMO Heat Round · Primary 1 · Arithmetic &amp; Number Theory</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  .q-text u { text-decoration-color: #6366f1; text-decoration-thickness: 2px; text-underline-offset: 4px; font-weight: 600; }
+  .palette::-webkit-scrollbar { height: 4px; }
+  .palette::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+  .fade-in { animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body class="bg-gradient-to-b from-indigo-50 via-white to-white min-h-screen text-slate-800">
+
+<!-- START SCREEN -->
+<section id="startScreen" class="max-w-2xl mx-auto px-4 py-10 sm:py-16">
+  <div class="bg-white rounded-3xl shadow-xl shadow-indigo-100 border border-indigo-100 p-6 sm:p-10 text-center">
+    <div class="text-5xl mb-3">🏆</div>
+    <p class="text-xs font-bold tracking-widest text-indigo-600 uppercase">TIMO · Heat Round · Primary 1</p>
+    <h1 class="text-2xl sm:text-4xl font-extrabold mt-2 text-slate-900">Arithmetic &amp; Number Theory</h1>
+    <p class="text-slate-500 mt-3">Olympic Math Practice · Heat Round</p>
+    <div class="grid grid-cols-3 gap-3 mt-8">
+      <div class="rounded-2xl bg-indigo-50 p-4"><p class="text-2xl font-extrabold text-indigo-700" id="infoCount">10</p><p class="text-xs text-slate-500 font-medium">Questions</p></div>
+      <div class="rounded-2xl bg-amber-50 p-4"><p class="text-2xl font-extrabold text-amber-600" id="infoTime">20</p><p class="text-xs text-slate-500 font-medium">Minutes</p></div>
+      <div class="rounded-2xl bg-emerald-50 p-4"><p class="text-2xl font-extrabold text-emerald-600">+10</p><p class="text-xs text-slate-500 font-medium">Points each</p></div>
+    </div>
+    <ul class="text-left text-sm text-slate-600 mt-8 space-y-2 bg-slate-50 rounded-2xl p-5">
+      <li>⏱️ The timer gives you <b>2 minutes per question</b>.</li>
+      <li>💡 Stuck? Tap <b>Show Visual Hint</b> to see a picture explanation.</li>
+      <li>⌨️ Type your answer, then press <b>Enter</b> to go to the next question.</li>
+      <li>🔢 Use the question numbers at the bottom to jump between questions.</li>
+    </ul>
+    <button id="startBtn" class="mt-8 w-full sm:w-auto px-10 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition text-white font-bold text-lg shadow-lg shadow-indigo-200">Start Test 🚀</button>
+  </div>
+</section>
+
+<!-- QUIZ SCREEN -->
+<section id="quizScreen" class="hidden">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="min-w-0">
+        <p class="text-[11px] font-bold tracking-widest text-indigo-600 uppercase truncate">TIMO Heat Round · P1</p>
+        <p class="font-bold text-slate-900"><span id="progressText">Question 1 / 10</span> <span class="text-slate-400 font-medium text-sm">· <span id="answeredText">0</span> answered</span></p>
+      </div>
+      <div id="timer" class="shrink-0 font-mono font-bold text-lg sm:text-xl px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700">20:00</div>
+    </div>
+    <div class="h-2 bg-slate-100"><div id="progressBar" class="h-2 bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-300" style="width:0%"></div></div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 pt-5 pb-36">
+    <article id="questionCard" class="bg-white rounded-3xl shadow-lg shadow-slate-100 border border-slate-200 p-5 sm:p-8">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <h2 id="qTitle" class="text-lg font-extrabold text-slate-900">Question 1</h2>
+        <span id="qTopic" class="text-xs font-bold px-3 py-1 rounded-full"></span>
+      </div>
+      <div id="qText" class="q-text mt-4 text-lg sm:text-xl leading-relaxed text-slate-800"></div>
+
+      <div id="figureWrap" class="hidden mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-2"><div><canvas id="figureCanvas" class="block"></canvas></div></div>
+
+      <div id="vocab" class="mt-4 flex flex-wrap gap-2"></div>
+
+      <button id="hintBtn" class="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-amber-300 bg-amber-50 text-amber-700 font-bold text-sm hover:bg-amber-100 transition">💡 Show Visual Hint</button>
+      <div id="hintPanel" class="hidden mt-3 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/60 p-3 fade-in">
+        <div><canvas id="hintCanvas" class="block"></canvas></div>
+        <p id="hintText" class="mt-2 text-sm text-amber-900 font-medium px-1"></p>
+      </div>
+
+      <div class="mt-6 border-t border-slate-100 pt-5">
+        <label for="answerInput" class="text-sm font-bold text-slate-500 uppercase tracking-wide">Your answer</label>
+        <div id="choiceArea" class="hidden mt-2 flex flex-wrap gap-3"></div>
+        <div id="inputArea" class="mt-2">
+          <input id="answerInput" type="text" inputmode="numeric" autocomplete="off" maxlength="9" placeholder="Type your answer…" class="w-full text-2xl font-bold text-center rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none py-3 transition">
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <nav class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200" style="padding-bottom: env(safe-area-inset-bottom)">
+    <div class="max-w-3xl mx-auto px-3 py-3 flex items-center gap-2">
+      <button id="prevBtn" class="shrink-0 px-3 sm:px-5 py-3 rounded-xl border-2 border-slate-200 font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition">‹ <span class="hidden sm:inline">Previous</span></button>
+      <div id="palette" class="palette flex-1 min-w-0 flex gap-1.5 overflow-x-auto px-1 py-1 justify-start"></div>
+      <button id="nextBtn" class="shrink-0 px-3 sm:px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow transition">Next ›</button>
+    </div>
+  </nav>
+</section>
+
+<!-- SUBMIT MODAL -->
+<div id="submitModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl fade-in">
+    <div class="text-4xl">📝</div>
+    <h3 class="text-xl font-extrabold mt-2">Submit your test?</h3>
+    <p id="modalInfo" class="text-slate-600 mt-2 text-sm"></p>
+    <div class="mt-6 grid grid-cols-2 gap-3">
+      <button id="cancelSubmit" class="py-3 rounded-xl border-2 border-slate-200 font-bold text-slate-600 hover:bg-slate-50">Keep Working</button>
+      <button id="confirmSubmit" class="py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold">Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<section id="resultScreen" class="hidden max-w-3xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-3xl shadow-xl shadow-indigo-100 border border-indigo-100 p-6 sm:p-10 text-center">
+    <p id="timeUpBanner" class="hidden mb-4 rounded-xl bg-red-50 text-red-600 font-bold py-2">⏰ Time's up! Your answers were submitted automatically.</p>
+    <div id="medalIcon" class="text-7xl"></div>
+    <h2 id="medalName" class="text-2xl sm:text-3xl font-extrabold mt-2"></h2>
+    <p id="medalMsg" class="text-slate-500 mt-1"></p>
+    <div class="grid grid-cols-3 gap-3 mt-6">
+      <div class="rounded-2xl bg-indigo-50 p-4"><p id="scoreVal" class="text-2xl sm:text-3xl font-extrabold text-indigo-700"></p><p class="text-xs text-slate-500 font-medium">Score</p></div>
+      <div class="rounded-2xl bg-emerald-50 p-4"><p id="correctVal" class="text-2xl sm:text-3xl font-extrabold text-emerald-600"></p><p class="text-xs text-slate-500 font-medium">Correct</p></div>
+      <div class="rounded-2xl bg-amber-50 p-4"><p id="timeVal" class="text-2xl sm:text-3xl font-extrabold text-amber-600"></p><p class="text-xs text-slate-500 font-medium">Time used</p></div>
+    </div>
+    <p class="text-xs text-slate-400 mt-4">🥇 Gold ≥ 85% · 🥈 Silver ≥ 70% · 🥉 Bronze ≥ 50% · 📜 Certificate of Participation</p>
+    <button id="retryBtn" class="mt-6 px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200">🔄 Try Again</button>
+  </div>
+  <h3 class="text-xl font-extrabold mt-10 mb-4 text-slate-900">📖 Solution Review</h3>
+  <div id="reviewList" class="space-y-4"></div>
+</section>
+
+<script>
+// ===================== DRAWING HELPERS =====================
+const C = {
+  indigo:'#4f46e5', indigoL:'#e0e7ff', amber:'#d97706', amberL:'#fef3c7', green:'#16a34a', greenL:'#dcfce7',
+  red:'#dc2626', redL:'#fee2e2', blue:'#2563eb', blueL:'#dbeafe', pink:'#db2777', pinkL:'#fce7f3',
+  slate:'#334155', slateL:'#f1f5f9', border:'#94a3b8'
+};
+
+function rr(ctx, x, y, w, h, r, fill, stroke, lw = 2) {
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+
+function txt(ctx, s, x, y, { size = 16, color = C.slate, weight = 600, align = 'center', maxW } = {}) {
+  let sz = size;
+  ctx.font = `${weight} ${sz}px Inter, system-ui, sans-serif`;
+  if (maxW) while (ctx.measureText(String(s)).width > maxW && sz > 8) { sz--; ctx.font = `${weight} ${sz}px Inter, system-ui, sans-serif`; }
+  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillText(String(s), x, y);
+}
+
+function arrowHead(ctx, x, y, angle, color, size = 7) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - size * Math.cos(angle - 0.45), y - size * Math.sin(angle - 0.45));
+  ctx.lineTo(x - size * Math.cos(angle + 0.45), y - size * Math.sin(angle + 0.45));
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+
+function arrowLine(ctx, x1, y1, x2, y2, color) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+  arrowHead(ctx, x2, y2, Math.atan2(y2 - y1, x2 - x1), color);
+}
+
+function arcArrow(ctx, x1, x2, y, label, color, below = false) {
+  const dir = below ? 1 : -1;
+  const peak = Math.min(26, (x2 - x1) * 0.5 + 6);
+  const cy = y + dir * peak * 2, mx = (x1 + x2) / 2;
+  ctx.beginPath(); ctx.moveTo(x1, y); ctx.quadraticCurveTo(mx, cy, x2, y);
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+  arrowHead(ctx, x2, y, Math.atan2(y - cy, x2 - mx), color);
+  if (label) txt(ctx, label, mx, y + dir * (peak + 9), { size: 12, color, weight: 800 });
+}
+
+// Row of boxed items. opts: y, hl (indices), fills, arcs [{i,j,label,color,below}], sub (labels under)
+function seqRow(ctx, w, h, items, opts = {}) {
+  const n = items.length, gap = 6;
+  const bw = Math.min(opts.max || 54, (w - 16 - gap * (n - 1)) / n);
+  const bh = Math.max(26, Math.min(44, bw));
+  const x0 = (w - (n * bw + (n - 1) * gap)) / 2, y = opts.y ?? h / 2;
+  const xs = [];
+  items.forEach((it, i) => {
+    const x = x0 + i * (bw + gap);
+    xs.push(x + bw / 2);
+    const hl = opts.hl && opts.hl.includes(i);
+    const fill = hl ? C.amberL : (opts.fills && opts.fills[i]) || '#fff';
+    rr(ctx, x, y - bh / 2, bw, bh, 8, fill, hl ? C.amber : C.border, hl ? 3 : 1.5);
+    txt(ctx, it, x + bw / 2, y, { size: Math.min(20, bw * 0.45), color: hl ? C.amber : C.slate, weight: 800, maxW: bw - 4 });
+    if (opts.sub) txt(ctx, opts.sub[i], x + bw / 2, y + bh / 2 + 11, { size: 10, color: '#64748b', weight: 600, maxW: bw + 4 });
+  });
+  (opts.arcs || []).forEach(a => {
+    const yy = a.below ? y + bh / 2 + 2 : y - bh / 2 - 2;
+    arcArrow(ctx, xs[a.i], xs[a.j], yy, a.label, a.color || C.indigo, a.below);
+  });
+  return { xs, bw, bh, y };
+}
+
+function textLines(ctx, w, h, lines, top = 0) {
+  const n = lines.length, span = h - top;
+  lines.forEach((l, i) => txt(ctx, l.t, w / 2, top + span * (i + 0.5) / n, { size: l.s || 17, color: l.c || C.slate, weight: l.b || 700, maxW: w - 20 }));
+}
+
+function flowBoxes(ctx, w, h, boxes, arrows = []) {
+  const n = boxes.length, aw = n > 1 ? 38 : 0;
+  const bw = Math.min(170, (w - 16 - aw * (n - 1)) / n), bh = Math.min(h - 24, 100);
+  const x0 = (w - (n * bw + (n - 1) * aw)) / 2, y0 = (h - bh) / 2;
+  boxes.forEach((b, i) => {
+    const x = x0 + i * (bw + aw);
+    rr(ctx, x, y0, bw, bh, 14, b.bg, b.c, 2);
+    const L = b.l.length;
+    b.l.forEach((t, k) => {
+      const last = k === L - 1;
+      txt(ctx, t, x + bw / 2, y0 + bh * (k + 1) / (L + 1), { size: last ? 22 : 13, color: last ? b.c : C.slate, weight: last ? 800 : 600, maxW: bw - 10 });
+    });
+    if (i < n - 1) {
+      const ax = x + bw + 4, bx = x + bw + aw - 4;
+      arrowLine(ctx, ax, h / 2, bx, h / 2, C.slate);
+      if (arrows[i]) txt(ctx, arrows[i], (ax + bx) / 2, h / 2 - 13, { size: 13, color: C.indigo, weight: 800 });
+    }
+  });
+}
+
+// ===================== FIGURE / HINT DRAWERS =====================
+function drawVertical(ctx, w, h, rows, cy) {
+  const cw = 38, rh = 40, cx = w / 2, top = cy - (rows.length * rh) / 2;
+  rows.forEach((row, r) => {
+    row.forEach((cell, k) => {
+      const t = typeof cell === 'object' ? cell.t : cell, color = typeof cell === 'object' ? cell.c : C.slate;
+      txt(ctx, t, cx + (k - 1) * cw, top + r * rh + rh / 2, { size: 28, color, weight: 800 });
+    });
+  });
+  const ly = top + (rows.length - 1) * rh;
+  ctx.beginPath(); ctx.moveTo(cx - 1.6 * cw, ly); ctx.lineTo(cx + 1.6 * cw, ly); ctx.strokeStyle = C.slate; ctx.lineWidth = 3; ctx.stroke();
+}
+
+// ===================== QUESTIONS DATA =====================
+const seqHtml = s => `<div class="mt-3 text-2xl sm:text-3xl font-extrabold tracking-wide text-indigo-700 text-center bg-indigo-50 rounded-2xl py-3 px-2">${s}</div>`;
+const ord = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+
+const questionsData = [
+  // ---------- ARITHMETIC ----------
+  {
+    id: 1, topic: 'Arithmetic',
+    textEn: `Find the <u>value</u> of:${seqHtml('21 + 7 + 62 + 23 + 39 + 38')}`,
+    vocab: [{ en: 'Value', vi: 'Giá trị' }],
+    correctAnswer: '190',
+    hintEn: 'Make "friendly pairs" whose ones digits add up to 10.',
+    hintH: 200,
+    drawQuestion: (ctx, w, h) => textLines(ctx, w, h, [
+      { t: 'Make friendly pairs!', s: 15, c: '#64748b' },
+      { t: '21 + 39 = 60', c: C.blue },
+      { t: '62 + 38 = 100', c: C.green },
+      { t: '7 + 23 = 30', c: C.pink },
+      { t: '60 + 100 + 30 = 190', c: C.indigo, s: 21, b: 800 },
+    ]),
+    solutionVi: 'Ghép các số thành cặp để được số tròn chục cho dễ cộng:<br>• 21 + 39 = 60<br>• 62 + 38 = 100<br>• 7 + 23 = 30<br>Cộng lại: 60 + 100 + 30 = <b>190</b>.'
+  },
+  {
+    id: 2, topic: 'Arithmetic',
+    textEn: `Find the <u>value</u> of:${seqHtml('25 − 38 + 50 − 5')}`,
+    vocab: [{ en: 'Value', vi: 'Giá trị' }],
+    correctAnswer: '32',
+    hintEn: 'Add all the "+" numbers together, add all the "−" numbers together, then subtract.',
+    hintH: 160,
+    drawQuestion: (ctx, w, h) => textLines(ctx, w, h, [
+      { t: 'Plus group:  25 + 50 = 75', c: C.green },
+      { t: 'Minus group:  38 + 5 = 43', c: C.red },
+      { t: '75 − 43 = 32', c: C.indigo, s: 21, b: 800 },
+    ]),
+    solutionVi: 'Cộng các số có dấu cộng trước: 25 + 50 = 75.<br>Gộp các số có dấu trừ: 38 + 5 = 43.<br>Lấy 75 − 43 = <b>32</b>.'
+  },
+  {
+    id: 3, topic: 'Arithmetic',
+    textEn: `Find the <u>value</u> of:${seqHtml('6 + 11 − 5 + 6 + 11 − 5 + 6 + 11 − 5 + 6 + 11 − 5')}`,
+    vocab: [{ en: 'Value', vi: 'Giá trị' }],
+    correctAnswer: '48',
+    hintEn: 'The block "6 + 11 − 5" repeats. Work out one block, then count how many blocks there are.',
+    hintH: 150,
+    drawQuestion: (ctx, w, h) => {
+      const n = 4, gap = 8, bw = Math.min(120, (w - 16 - gap * 3) / 4), x0 = (w - (n * bw + 3 * gap)) / 2;
+      const cols = [[C.blue, C.blueL], [C.pink, C.pinkL], [C.green, C.greenL], [C.amber, C.amberL]];
+      for (let i = 0; i < n; i++) {
+        const x = x0 + i * (bw + gap);
+        rr(ctx, x, 16, bw, 64, 12, cols[i][1], cols[i][0]);
+        txt(ctx, '6 + 11 − 5', x + bw / 2, 36, { size: 13, maxW: bw - 8 });
+        txt(ctx, '= 12', x + bw / 2, 60, { size: 20, color: cols[i][0], weight: 800 });
+      }
+      txt(ctx, '12 + 12 + 12 + 12 = 48', w / 2, h - 30, { size: 20, color: C.indigo, weight: 800 });
+    },
+    solutionVi: 'Nhóm “6 + 11 − 5” được lặp lại 4 lần.<br>Mỗi nhóm: 6 + 11 = 17, rồi 17 − 5 = 12.<br>4 nhóm: 12 + 12 + 12 + 12 = <b>48</b>.'
+  },
+  {
+    id: 4, topic: 'Arithmetic',
+    textEn: `What is the number <u>filled</u> in the <u>blank</u> if the <u>equation</u> below is <u>correct</u>?${seqHtml('32 − ___ = 15')}`,
+    vocab: [{ en: 'Fill', vi: 'Điền' }, { en: 'Blank', vi: 'Chỗ trống' }, { en: 'Equation', vi: 'Phép tính' }, { en: 'Correct', vi: 'Đúng' }],
+    correctAnswer: '17',
+    hintEn: 'The whole bar is 32. One part is 15. The missing part = whole − known part.',
+    hintH: 170,
+    drawQuestion: (ctx, w, h) => {
+      const L = w - 40, x = 20, p1 = L * 15 / 32;
+      rr(ctx, x, 20, L, 36, 8, C.indigoL, C.indigo); txt(ctx, '32', x + L / 2, 38, { size: 18, color: C.indigo, weight: 800 });
+      rr(ctx, x, 70, p1, 36, 8, C.greenL, C.green); txt(ctx, '15', x + p1 / 2, 88, { size: 18, color: C.green, weight: 800 });
+      rr(ctx, x + p1 + 4, 70, L - p1 - 4, 36, 8, C.amberL, C.amber); txt(ctx, '?', x + p1 + (L - p1) / 2, 88, { size: 20, color: C.amber, weight: 800 });
+      txt(ctx, '32 − 15 = 17', w / 2, h - 22, { size: 20, color: C.indigo, weight: 800 });
+    },
+    solutionVi: 'Lấy 32 bớt đi một số thì còn 15.<br>Vậy số cần điền là: 32 − 15 = <b>17</b>.<br>Thử lại: 32 − 17 = 15 ✔'
+  },
+  {
+    id: 5, topic: 'Arithmetic',
+    textEn: 'Given that A and B <u>represent</u> <u>different</u> <u>1-digit numbers</u>, what is the <u>value</u> of B if the <u>equation</u> is <u>correct</u>?',
+    vocab: [{ en: 'Represent', vi: 'Biểu diễn' }, { en: 'Different', vi: 'Khác nhau' }, { en: '1-digit number', vi: 'Số có 1 chữ số' }, { en: 'Value', vi: 'Giá trị' }, { en: 'Equation', vi: 'Phép tính' }, { en: 'Correct', vi: 'Đúng' }],
+    correctAnswer: '7',
+    figureH: 150,
+    drawFigure: (ctx, w, h) => drawVertical(ctx, w, h, [['', '', 'A'], ['+', 'A', 'B'], ['', '5', '1']], h / 2),
+    hintEn: 'Look at the tens column: A plus a possible carry gives 5, so A is 4 or 5. Try A = 4: ones column 4 + B must end in 1.',
+    hintH: 210,
+    drawQuestion: (ctx, w, h) => {
+      drawVertical(ctx, w, h, [['', '', { t: '4', c: C.blue }], ['+', { t: '4', c: C.blue }, { t: '7', c: C.pink }], ['', '5', '1']], 70);
+      txt(ctx, 'Ones: 4 + 7 = 11 → write 1, carry 1', w / 2, 160, { size: 14, weight: 700, maxW: w - 16 });
+      txt(ctx, 'Tens: 4 + 1 = 5 ✔   So B = 7', w / 2, 188, { size: 16, color: C.indigo, weight: 800, maxW: w - 16 });
+    },
+    solutionVi: 'Kết quả là 51, chữ số hàng chục là 5, nên A chỉ có thể là 4 hoặc 5.<br>• Thử A = 5: 5 + 5B đã lớn hơn 55, không thể bằng 51 ✘.<br>• Thử A = 4: 4 + 4B = 51, hàng đơn vị 4 + B phải bằng 11, nên B = 7.<br>Thử lại: 4 + 47 = 51 ✔. Vậy B = <b>7</b>.'
+  },
+  // ---------- NUMBER THEORY ----------
+  {
+    id: 6, topic: 'Number Theory',
+    textEn: `By <u>observing</u> the numbers, which <u>even number</u> is the <u>greatest</u>?${seqHtml('58, 63, 28, 80, 92, 97, 71')}`,
+    vocab: [{ en: 'Observing', vi: 'Quan sát' }, { en: 'Even number', vi: 'Số chẵn' }, { en: 'Greatest', vi: 'Lớn nhất' }],
+    correctAnswer: '92',
+    hintEn: 'Even numbers end in 0, 2, 4, 6 or 8 (green). Pick the biggest green number.',
+    hintH: 120,
+    drawQuestion: (ctx, w, h) => {
+      const items = [58, 63, 28, 80, 92, 97, 71];
+      seqRow(ctx, w, h, items, { y: h / 2 - 6, hl: [4], fills: items.map(n => n % 2 ? C.slateL : C.greenL), sub: items.map(n => n % 2 ? 'odd' : 'even') });
+    },
+    solutionVi: 'Số chẵn là số có chữ số hàng đơn vị là 0, 2, 4, 6, 8.<br>Các số chẵn: 58, 28, 80, 92.<br>Số lớn nhất trong đó là <b>92</b>. (97 lớn hơn nhưng là số lẻ.)'
+  },
+  {
+    id: 7, topic: 'Number Theory',
+    textEn: `The numbers below form an <u>arithmetic sequence</u>. What is the <u>9th number</u>?${seqHtml('50, 47, 44, 41, …')}`,
+    vocab: [{ en: 'Arithmetic sequence', vi: 'Dãy số cách đều' }, { en: '9th number', vi: 'Số thứ 9' }],
+    correctAnswer: '26',
+    hintEn: 'Each number is 3 less than the one before. Keep subtracting 3 until the 9th number.',
+    hintH: 140,
+    drawQuestion: (ctx, w, h) => {
+      const items = [50, 47, 44, 41, 38, 35, 32, 29, 26];
+      seqRow(ctx, w, h, items, { y: h / 2 + 8, hl: [8], sub: items.map((_, i) => ord(i + 1)), arcs: items.slice(1).map((_, i) => ({ i, j: i + 1, label: '−3', color: C.red })) });
+    },
+    solutionVi: 'Mỗi số kém số đứng trước nó 3 đơn vị. Ta đếm lùi, mỗi lần bớt 3:<br>50, 47, 44, 41, 38, 35, 32, 29, 26.<br>Số thứ 9 là <b>26</b>.'
+  },
+  {
+    id: 8, topic: 'Number Theory',
+    textEn: '<u>Each</u> <u>box</u> of <u>eggs</u> has 8 eggs. Mom asks Mary to buy 20 eggs. Her neighbor asks her to buy 15 eggs. <u>At least</u> how many boxes of eggs does Mary need to buy?',
+    vocab: [{ en: 'Each', vi: 'Mỗi' }, { en: 'Box', vi: 'Hộp' }, { en: 'Egg', vi: 'Trứng' }, { en: 'At least', vi: 'Ít nhất' }],
+    correctAnswer: '5',
+    hintEn: 'Yellow eggs are for Mom (20), pink eggs are for the neighbor (15). Count how many boxes are needed to hold all 35 eggs.',
+    hintH: 170,
+    drawQuestion: (ctx, w, h) => {
+      const n = 5, gap = 8, bw = Math.min(96, (w - 16 - gap * 4) / 5), cell = bw / 4;
+      const x0 = (w - (n * bw + gap * 4)) / 2, y0 = 14;
+      let k = 0;
+      for (let b = 0; b < n; b++) {
+        const x = x0 + b * (bw + gap);
+        rr(ctx, x, y0, bw, cell * 2, 6, '#fff7ed', '#fb923c');
+        for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
+          ctx.beginPath(); ctx.ellipse(x + (c + 0.5) * cell, y0 + (r + 0.5) * cell, cell * 0.32, cell * 0.4, 0, 0, Math.PI * 2);
+          if (k < 20) { ctx.fillStyle = '#fde68a'; ctx.fill(); } else if (k < 35) { ctx.fillStyle = '#fbcfe8'; ctx.fill(); }
+          else { ctx.setLineDash([3, 3]); ctx.strokeStyle = C.border; ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]); }
+          k++;
+        }
+        txt(ctx, `Box ${b + 1}`, x + bw / 2, y0 + cell * 2 + 12, { size: 11, color: '#64748b' });
+      }
+      txt(ctx, '20 + 15 = 35 eggs', w / 2, h - 52, { size: 16, weight: 800 });
+      txt(ctx, '4 boxes = 32 (not enough) → 5 boxes = 40 ✔', w / 2, h - 24, { size: 15, color: C.indigo, weight: 800, maxW: w - 16 });
+    },
+    solutionVi: 'Mary cần mua tất cả: 20 + 15 = 35 quả trứng.<br>Đếm số trứng theo từng hộp: 8, 16, 24, 32, 40.<br>4 hộp có 32 quả – chưa đủ 35. 5 hộp có 40 quả – đủ.<br>Vậy cần mua ít nhất <b>5</b> hộp.'
+  },
+  {
+    id: 9, topic: 'Number Theory',
+    textEn: 'A <u>large</u> <u>package</u> <u>contains</u> 8 <u>candies</u>. A <u>small</u> package contains 3 candies. Buying 1 large package and 1 small package <u>together</u> will get you 1 <u>extra</u> candy for <u>free</u> <u>every time</u>. If Peggy buys 3 large packages and 6 small packages, how many candies does she have <u>in total</u>?',
+    vocab: [{ en: 'Large', vi: 'Lớn' }, { en: 'Package', vi: 'Túi' }, { en: 'Contain', vi: 'Chứa' }, { en: 'Candy', vi: 'Cái kẹo' }, { en: 'Small', vi: 'Nhỏ' }, { en: 'Together', vi: 'Cùng nhau' }, { en: 'Extra', vi: 'Thêm' }, { en: 'Free', vi: 'Miễn phí' }, { en: 'Every time', vi: 'Mỗi lần' }, { en: 'In total', vi: 'Tất cả' }],
+    correctAnswer: '45',
+    hintEn: 'Each free candy needs 1 large + 1 small package. There are only 3 large packages, so only 3 pairs can be made.',
+    hintH: 150,
+    drawQuestion: (ctx, w, h) => flowBoxes(ctx, w, h, [
+      { l: ['3 large × 8', '24'], c: C.blue, bg: C.blueL },
+      { l: ['6 small × 3', '18'], c: C.green, bg: C.greenL },
+      { l: ['3 pairs → free', '3'], c: C.pink, bg: C.pinkL },
+      { l: ['Total', '45'], c: C.indigo, bg: C.indigoL },
+    ], ['+', '+', '=']),
+    solutionVi: '3 túi lớn: 8 + 8 + 8 = 24 cái kẹo.<br>6 túi nhỏ: 3 + 3 + 3 + 3 + 3 + 3 = 18 cái kẹo.<br>Cứ 1 túi lớn đi cùng 1 túi nhỏ thì được tặng 1 kẹo. Chỉ có 3 túi lớn nên ghép được 3 lần → được tặng 3 kẹo.<br>Tất cả: 24 + 18 + 3 = <b>45</b> cái kẹo.'
+  },
+  {
+    id: 10, topic: 'Number Theory',
+    textEn: `<u>Determine</u> whether the <u>result</u> of the sum below is <u>odd</u> or <u>even</u>.${seqHtml('2 + 5 + 7 + 8 + 11 + 13 + 14 + 15 + 17 + 20 + 21 + 23')}`,
+    vocab: [{ en: 'Determine', vi: 'Xác định' }, { en: 'Result', vi: 'Kết quả' }, { en: 'Odd', vi: 'Lẻ' }, { en: 'Even', vi: 'Chẵn' }],
+    options: ['Odd', 'Even'],
+    correctAnswer: 'Even',
+    hintEn: 'Only the odd numbers (red) can change the answer. Count them: if there is an even number of odd numbers, the total is even.',
+    hintH: 160,
+    drawQuestion: (ctx, w, h) => {
+      const items = [2, 5, 7, 8, 11, 13, 14, 15, 17, 20, 21, 23];
+      seqRow(ctx, w, h, items, { y: 34, fills: items.map(n => n % 2 ? C.redL : C.blueL) });
+      txt(ctx, 'Odd numbers: 5, 7, 11, 13, 15, 17, 21, 23 → 8 of them', w / 2, 86, { size: 14, color: C.red, weight: 700, maxW: w - 16 });
+      txt(ctx, '8 odd numbers (even count) → total is EVEN', w / 2, 124, { size: 16, color: C.indigo, weight: 800, maxW: w - 16 });
+    },
+    solutionVi: 'Không cần tính tổng, chỉ cần đếm các số lẻ: 5, 7, 11, 13, 15, 17, 21, 23 → có 8 số lẻ.<br>Hai số lẻ cộng lại được số chẵn. 8 số lẻ ghép được thành 4 cặp, không thừa số nào.<br>Các số chẵn cộng với nhau vẫn là số chẵn. Vậy kết quả là số <b>CHẴN</b> (Even).'
+  },
+];
+
+// ===================== APP STATE & LOGIC =====================
+const MIN_PER_Q = 2;
+const TOTAL_TIME = questionsData.length * MIN_PER_Q * 60;
+const TOPIC_STYLE = {
+  'Arithmetic': 'bg-sky-100 text-sky-700',
+  'Number Theory': 'bg-emerald-100 text-emerald-700',
+};
+
+const $ = id => document.getElementById(id);
+const state = { current: 0, answers: [], timeLeft: TOTAL_TIME, timerId: null, hintOpen: false, finished: false };
+
+const normalize = s => String(s ?? '').trim().toLowerCase().replace(/\s+/g, '');
+const isCorrect = (q, a) => a !== '' && normalize(a) === normalize(q.correctAnswer);
+const fmtTime = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function fitCanvas(canvas, height) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.max(260, canvas.parentElement.clientWidth);
+  canvas.style.width = w + 'px'; canvas.style.height = height + 'px';
+  canvas.width = Math.round(w * dpr); canvas.height = Math.round(height * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, height);
+  return { ctx, w, h: height };
+}
+
+function drawFigure() {
+  const q = questionsData[state.current];
+  $('figureWrap').classList.toggle('hidden', !q.drawFigure);
+  if (!q.drawFigure) return;
+  const { ctx, w, h } = fitCanvas($('figureCanvas'), q.figureH || 160);
+  q.drawFigure(ctx, w, h);
+}
+
+function drawHint() {
+  const q = questionsData[state.current];
+  const { ctx, w, h } = fitCanvas($('hintCanvas'), q.hintH || 180);
+  q.drawQuestion(ctx, w, h);
+}
+
+function setHint(open) {
+  state.hintOpen = open;
+  $('hintPanel').classList.toggle('hidden', !open);
+  $('hintBtn').innerHTML = open ? '🙈 Hide Visual Hint' : '💡 Show Visual Hint';
+  if (open) { $('hintText').textContent = questionsData[state.current].hintEn; drawHint(); }
+}
+
+function pressKey(k) {
+  const input = $('answerInput');
+  let v = input.value;
+  if (k === '⌫') v = v.slice(0, -1);
+  else if (k === 'C') v = '';
+  else if (v.length < 9) v += k;
+  input.value = v;
+  saveAnswer(v);
+}
+
+function saveAnswer(v) {
+  state.answers[state.current] = v;
+  updatePalette(); updateProgress();
+}
+
+function renderChoices(q) {
+  const sel = state.answers[state.current];
+  $('choiceArea').innerHTML = q.options.map(o => {
+    const active = normalize(o) === normalize(sel);
+    return `<button type="button" data-opt="${escapeHtml(o)}" class="min-w-[72px] px-5 py-3 rounded-2xl border-2 text-xl font-extrabold transition active:scale-95 ${active ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300'}">${escapeHtml(o)}</button>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  const q = questionsData[state.current], n = questionsData.length;
+  $('qTitle').textContent = `Question ${state.current + 1}`;
+  $('qTopic').textContent = q.topic;
+  $('qTopic').className = `text-xs font-bold px-3 py-1 rounded-full ${TOPIC_STYLE[q.topic]}`;
+  $('qText').innerHTML = q.textEn;
+  $('vocab').innerHTML = q.vocab.map(v => `<span class="inline-flex items-center gap-1 text-xs sm:text-sm px-3 py-1 rounded-full bg-slate-100 border border-slate-200"><b class="text-indigo-700">${v.en}</b><span class="text-slate-400">·</span><span class="text-slate-600">${v.vi}</span></span>`).join('');
+
+  const hasChoices = Array.isArray(q.options);
+  $('choiceArea').classList.toggle('hidden', !hasChoices);
+  $('inputArea').classList.toggle('hidden', hasChoices);
+  if (hasChoices) renderChoices(q); else $('answerInput').value = state.answers[state.current];
+
+  setHint(false);
+  drawFigure();
+
+  $('prevBtn').disabled = state.current === 0;
+  $('nextBtn').innerHTML = state.current === n - 1 ? 'Submit ✓' : 'Next ›';
+  $('nextBtn').classList.toggle('bg-emerald-600', state.current === n - 1);
+  $('nextBtn').classList.toggle('hover:bg-emerald-700', state.current === n - 1);
+  updatePalette(); updateProgress();
+
+  const card = $('questionCard');
+  card.classList.remove('fade-in'); void card.offsetWidth; card.classList.add('fade-in');
+}
+
+function updateProgress() {
+  const n = questionsData.length;
+  $('progressText').textContent = `Question ${state.current + 1} / ${n}`;
+  $('progressBar').style.width = `${((state.current + 1) / n) * 100}%`;
+  $('answeredText').textContent = state.answers.filter(a => a !== '').length;
+}
+
+function buildPalette() {
+  $('palette').innerHTML = questionsData.map((_, i) => `<button type="button" data-idx="${i}" class="shrink-0 w-9 h-9 rounded-full text-sm font-bold border-2 transition">${i + 1}</button>`).join('');
+  $('palette').addEventListener('click', e => {
+    const b = e.target.closest('button[data-idx]');
+    if (b) goTo(+b.dataset.idx);
+  });
+}
+
+function updatePalette() {
+  [...$('palette').children].forEach((b, i) => {
+    const answered = state.answers[i] !== '', cur = i === state.current;
+    b.className = 'shrink-0 w-9 h-9 rounded-full text-sm font-bold border-2 transition ' +
+      (cur ? 'ring-4 ring-indigo-200 border-indigo-600 ' : 'border-transparent ') +
+      (answered ? 'bg-indigo-600 text-white' : cur ? 'bg-white text-indigo-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200');
+  });
+  $('palette').children[state.current]?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+}
+
+function goTo(i) {
+  if (i < 0 || i >= questionsData.length) return;
+  state.current = i;
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goNext() {
+  if (state.current < questionsData.length - 1) goTo(state.current + 1);
+  else openModal();
+}
+
+function openModal() {
+  const unanswered = state.answers.map((a, i) => a === '' ? i + 1 : null).filter(Boolean);
+  const answered = questionsData.length - unanswered.length;
+  $('modalInfo').innerHTML = `You answered <b>${answered}</b> of <b>${questionsData.length}</b> questions.` +
+    (unanswered.length ? `<br><span class="text-red-500">Unanswered: ${unanswered.join(', ')}</span>` : '<br><span class="text-emerald-600">All questions answered! 🎉</span>');
+  $('submitModal').classList.remove('hidden');
+}
+const closeModal = () => $('submitModal').classList.add('hidden');
+const modalOpen = () => !$('submitModal').classList.contains('hidden');
+
+function tick() {
+  state.timeLeft--;
+  renderTimer();
+  if (state.timeLeft <= 0) submit(true);
+}
+
+function renderTimer() {
+  const t = $('timer'), low = state.timeLeft <= 300;
+  t.textContent = fmtTime(Math.max(0, state.timeLeft));
+  t.className = `shrink-0 font-mono font-bold text-lg sm:text-xl px-4 py-2 rounded-xl ${low ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-indigo-50 text-indigo-700'}`;
+}
+
+function startQuiz() {
+  state.current = 0;
+  state.answers = questionsData.map(() => '');
+  state.timeLeft = TOTAL_TIME;
+  state.finished = false;
+  $('startScreen').classList.add('hidden');
+  $('resultScreen').classList.add('hidden');
+  $('quizScreen').classList.remove('hidden');
+  renderTimer();
+  renderQuestion();
+  clearInterval(state.timerId);
+  state.timerId = setInterval(tick, 1000);
+}
+
+function medalFor(pct) {
+  if (pct >= 0.85) return { icon: '🥇', name: 'Gold Medal', msg: 'Outstanding! You are a math champion!', color: 'text-amber-500', level: 3 };
+  if (pct >= 0.7) return { icon: '🥈', name: 'Silver Medal', msg: 'Great job! Just a little more to reach Gold!', color: 'text-slate-500', level: 2 };
+  if (pct >= 0.5) return { icon: '🥉', name: 'Bronze Medal', msg: 'Well done! Keep practicing to climb higher!', color: 'text-orange-600', level: 1 };
+  return { icon: '📜', name: 'Certificate of Participation', msg: 'Nice try! Review the solutions and try again.', color: 'text-indigo-600', level: 0 };
+}
+
+function celebrate(level) {
+  if (typeof confetti !== 'function' || level < 1) return;
+  confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+  if (level >= 2) {
+    const end = Date.now() + (level === 3 ? 2500 : 1200);
+    (function frame() {
+      confetti({ particleCount: 4, angle: 60, spread: 60, origin: { x: 0 } });
+      confetti({ particleCount: 4, angle: 120, spread: 60, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  }
+}
+
+function submit(timeUp = false) {
+  if (state.finished) return;
+  state.finished = true;
+  clearInterval(state.timerId);
+  closeModal();
+
+  const n = questionsData.length;
+  const results = questionsData.map((q, i) => isCorrect(q, state.answers[i]));
+  const correct = results.filter(Boolean).length, score = correct * 10, max = n * 10;
+  const medal = medalFor(score / max);
+
+  $('quizScreen').classList.add('hidden');
+  $('resultScreen').classList.remove('hidden');
+  $('timeUpBanner').classList.toggle('hidden', !timeUp);
+  $('medalIcon').textContent = medal.icon;
+  $('medalName').textContent = medal.name;
+  $('medalName').className = `text-2xl sm:text-3xl font-extrabold mt-2 ${medal.color}`;
+  $('medalMsg').textContent = medal.msg;
+  $('scoreVal').textContent = `${score}/${max}`;
+  $('correctVal').textContent = `${correct}/${n}`;
+  $('timeVal').textContent = fmtTime(TOTAL_TIME - Math.max(0, state.timeLeft));
+
+  $('reviewList').innerHTML = questionsData.map((q, i) => {
+    const ok = results[i], ans = state.answers[i];
+    return `<div class="rounded-2xl border-2 ${ok ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/50'} p-5">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <p class="font-extrabold text-slate-900">${ok ? '✅' : '❌'} Question ${i + 1}</p>
+        <span class="text-xs font-bold px-3 py-1 rounded-full ${TOPIC_STYLE[q.topic]}">${q.topic}</span>
+      </div>
+      <div class="q-text mt-2 text-slate-700">${q.textEn}</div>
+      <div class="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+        <div class="rounded-xl bg-white border ${ok ? 'border-emerald-200' : 'border-red-200'} px-3 py-2">Your answer: <b class="${ok ? 'text-emerald-600' : 'text-red-600'}">${ans === '' ? '(blank)' : escapeHtml(ans)}</b></div>
+        <div class="rounded-xl bg-white border border-emerald-200 px-3 py-2">Correct answer: <b class="text-emerald-600">${escapeHtml(q.correctAnswer)}</b></div>
+      </div>
+      <div class="mt-3 text-sm space-y-2">
+        <p class="font-bold text-rose-600">🇻🇳 Lời giải:</p>
+        <p class="leading-relaxed">${q.solutionVi}</p>
+      </div>
+    </div>`;
+  }).join('');
+
+  window.scrollTo({ top: 0 });
+  setTimeout(() => celebrate(medal.level), 300);
+}
+
+// ===================== EVENTS =====================
+$('infoCount').textContent = questionsData.length;
+$('infoTime').textContent = TOTAL_TIME / 60;
+buildPalette();
+
+$('startBtn').addEventListener('click', startQuiz);
+$('retryBtn').addEventListener('click', startQuiz);
+$('prevBtn').addEventListener('click', () => goTo(state.current - 1));
+$('nextBtn').addEventListener('click', goNext);
+$('hintBtn').addEventListener('click', () => setHint(!state.hintOpen));
+$('cancelSubmit').addEventListener('click', closeModal);
+$('confirmSubmit').addEventListener('click', () => submit(false));
+$('submitModal').addEventListener('click', e => { if (e.target.id === 'submitModal') closeModal(); });
+
+$('answerInput').addEventListener('input', e => {
+  const v = e.target.value.replace(/[^0-9]/g, '').slice(0, 9);
+  e.target.value = v;
+  saveAnswer(v);
+});
+
+$('choiceArea').addEventListener('click', e => {
+  const b = e.target.closest('button[data-opt]');
+  if (!b) return;
+  saveAnswer(b.dataset.opt);
+  renderChoices(questionsData[state.current]);
+});
+
+document.addEventListener('keydown', e => {
+  if ($('quizScreen').classList.contains('hidden') || state.finished) return;
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (modalOpen()) submit(false); else goNext();
+    return;
+  }
+  if (e.key === 'Escape' && modalOpen()) { closeModal(); return; }
+  const q = questionsData[state.current];
+  if (modalOpen() || q.options || document.activeElement === $('answerInput')) return;
+  if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+  else if (e.key === 'Backspace') { e.preventDefault(); pressKey('⌫'); }
+});
+
+let resizeT;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    if ($('quizScreen').classList.contains('hidden')) return;
+    drawFigure();
+    if (state.hintOpen) drawHint();
+  }, 150);
+});
+</script>
+</body>
+</html>
